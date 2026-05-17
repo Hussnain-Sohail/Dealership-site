@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import { AuthProvider } from './AccessTokenProvider';
 import { useParams } from 'react-router-dom';
+import './css/PurchaseBike.css';
 
 function PurchaseBike() {
     const { companyName, bikeName } = useParams();
@@ -30,7 +31,7 @@ function PurchaseBike() {
                     'authorization': `Bearer ${AccessToken}`
                 },
                 body: JSON.stringify({
-                    name, company, password, city, contactNumber
+                    companyName, bikeName, password, city, contactNumber
                 })
             });
             if (!request.ok) {
@@ -48,16 +49,15 @@ function PurchaseBike() {
     console.log(companyName)
     return (
         <div>
-            <form onSubmit={Submit}>
-                <p>Company {companyName}</p>
-                <p>Bike Name {bikeName}</p>
-                <label>Enter Password</label><br />
-                <input type="password" required onChange={getPassword} /><br />
-                <label>Enter City</label><br />
-                <input type="text" required onChange={getCity} /><br />
-                <label>Enter Contact Number</label><br />
-                <input type="text" required onChange={getContactNumber} /><br />
-                <button>Place Order</button>
+            <form onSubmit={Submit} id="purchase-form">
+                <h2>Bike {companyName} {bikeName}</h2>
+                <label className="purchase-label">Enter Password</label><br />
+                <input className="purchase-input" type="password" required onChange={getPassword} /><br />
+                <label className="purchase-label">Enter City</label><br />
+                <input className="purchase-input" type="text" required onChange={getCity} /><br />
+                <label className="purchase-label">Contact Number</label><br />
+                <input className="purchase-input" type="text" required onChange={getContactNumber} /><br />
+                <button id="purchase-button">Place Order</button>
             </form>
         </div>
     )
