@@ -76,7 +76,7 @@ function FilterBikes() {
           bikes.map((data, index) => {
             return (
               <div className="bike-card" key={data._id}>
-                <Link to={`/purchasebike/${data.Name}`}>
+                <Link to={`/bikedetails/${data.Company}/${data.Name}`}>
                   <img
                     src={`/images/${Company}images/${data.Name}`}
                     alt={`This is a picture of ${data.Name}`}
@@ -86,6 +86,7 @@ function FilterBikes() {
                     Available Status:
                     {data.UnitsAvailable > 0 ? "In Stock" : "Out of Stock"}
                   </p>
+                  <p>Click for bike details</p>
                 </Link>
               </div>
             );

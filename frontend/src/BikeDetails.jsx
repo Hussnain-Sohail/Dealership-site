@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import './css/BikeDetails.css'
 
 function BikeDetails() {
-    const { company, name } = useParams();
+    const { Company, Name } = useParams();
     const [data, setData] = useState('');
     const [bike, setBike] = useState({});
 
+    console.log(`Company ${Company}`);
+    console.log(`Name ${Name}`);
     useEffect(() => {
         const getBikeDetails = async () => {
             try {
@@ -15,7 +18,7 @@ function BikeDetails() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        company, name,
+                        Company, Name,
                     })
                 });
                 if (!request.ok) {
@@ -33,17 +36,22 @@ function BikeDetails() {
     }, [bike]);
 
     return (
-        <div>
-            bike !== { } ? {
-                <div>
-                    <p>Name: {bike.Name} </p>
-                    <p>Company: {bike.Company}</p>
-                    <p>Top Speed: {bike.Topspeed}</p>
-                    <p>Horsepower: {bike.Horsepower}</p>
-                    <p>Engine specs: {bike.Engine}</p>
-                    <p>Price: {bike.Engine}</p>
-                </div>
-            } : <p>Bike Not found. please try again later</p>
+        <div id="bike-card-container">
+            {
+                bike ? (
+                    < div >
+                        <p>Name: {bike.Name} </p>
+                        <p>Company: {bike.Company}</p>
+                        <p>Top Speed: {bike.Topspeed} Km/h</p>
+                        <p>Horsepower: {bike.Horsepower}</p>
+                        <p>Engine specs: {bike.Engine}</p>
+                        <p>Price: {bike.Price} $USD</p>
+                    </div>
+                ) : (<p>Bike Not found. please try again later</p>)
+            }
+            <Link to={`/purchasebike/${bike.Company}/${bike.Name}`}>
+                <button id="purchase-button">Purchase Bike</button>
+            </Link>
         </div>
     )
 }

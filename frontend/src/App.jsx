@@ -27,7 +27,7 @@ function App() {
       <Route path="/findbike" element={<FindBike />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<LogIn />} />
-      <Route path="/bikedetails" element={<BikeDetails />} />
+      <Route path="/bikedetails/:Company/:Name" element={<BikeDetails />} />
       <Route
         path="/myaccount"
         element={

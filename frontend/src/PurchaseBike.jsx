@@ -28,6 +28,7 @@ function PurchaseBike() {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
+                    'Content-Type': 'application/json',
                     'authorization': `Bearer ${AccessToken}`
                 },
                 body: JSON.stringify({
