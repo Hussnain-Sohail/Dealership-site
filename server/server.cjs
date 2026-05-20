@@ -31,6 +31,7 @@ App.use(CookieParser());
 App.use('/', SignUpRouter);
 App.use('/', LogInRouter);
 App.use('/', AccountInformationRouter);
+App.use('/', BikeRouter);
 App.use('/', FindBikeRouter);
 App.use('/', BikeDetailsRouter);
 App.use('/', PurchaseBikeRouter);
