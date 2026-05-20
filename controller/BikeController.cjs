@@ -1,5 +1,9 @@
 const express = require("express");
 const Bike = require("../model/BikeSchema.cjs");
+const User = require('../model/UserSchema.cjs');
+const Order = require('../model/OrderSchema.cjs');
+const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 
 async function FetchBikes(req, res) {
   try {
@@ -37,4 +41,77 @@ async function FindBike(req, res) {
     console.error(error);
   }
 }
-module.exports = { FetchBikes, FindBike };
+
+async function BikeDetails(req, res) {
+  const { Company, Name } = req.body;
+  if (!Company || !Name)
+    return res.json({ message: 'Could not fetch bike' });
+
+  const bike = await Bike.findOne({ Company: Company, Name: Name });
+
+  if (!bike)
+    return res.json({ message: 'Could not fetch bike' });
+
+  return res.json({ bike: bike });
+}
+
+async function PurchaseBike(req, res) {
+  const session = await mongoose.startSession();
+  try {
+    console.log('hit purchase');
+
+    const name = req.user.name;
+    const { companyName, bikeName, password, city, contactNumber } = req.body;
+    const FindBike = await Bike.findOne({ Company: companyName, Name: bikeName });
+
+    session.startTransaction();
+
+    const bike = await Bike.findOneAndUpdate({
+      Company: companyName,
+      Name: bikeName,
+      UnitsAvailable: { $gt: 0 },
+    },
+      {
+        $inc: { UnitsAvailable: -1 }
+      },
+      {
+        new: true,
+        session,
+      },
+    );
+    if (!bike)
+      return res.json({ message: 'Bike not found' });
+    const FindUser = await User.findOne({ Name: name }, null, { session });
+    if (!FindUser)
+      return res.json({ message: `Username not found` });
+    const checkPassword = await bcrypt.compare(password, FindUser.Password);
+    if (!checkPassword)
+      return res.json({ message: 'Invalid password. Could not place order' });
+    if (FindUser.Orders.length === 3)
+      return res.json({ message: 'Were sorry but u already have maximux order limits at a time (3) pending' });
+
+    if (contactNumber.length !== 11)
+      //since a contact number in pakistan is 11 digits
+      return res.json({ message: 'Please enter valid contact number' });
+
+    const NewOrder = new Order({
+      BikeName: bikeName,
+      CompanyName: companyName,
+      OrederPlacedOnDate: new Date().toISOString(),
+    });
+
+    FindUser.Orders.push(NewOrder);
+
+    await NewOrder.save({ session });
+    await FindUser.save({ session });
+    await session.commitTransaction();
+
+    return res.json({ message: 'Order Placed successfully' });
+  }
+  catch (error) {
+    console.error(error);
+    await session.abortTransaction();
+    return res.status(500).json({ message: 'Could not place order' });
+  }
+}
+module.exports = { FetchBikes, FindBike, BikeDetails, PurchaseBike };
