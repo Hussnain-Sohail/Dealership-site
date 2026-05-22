@@ -1,13 +1,14 @@
 const mongoose = require("mongoose");
-const OrderSchema = require("./OrderSchema.cjs");
+const Order = require("./OrderSchema.cjs");
 const { type } = require("node:os");
 
 const UserSchema = new mongoose.Schema({
   Name: String,
   Age: Number,
   Password: String,
+  AccountCreatedAt: String,
   Role: { type: String, default: "user" },
-  Order: {
+  Orders: {
     type: [
       {
         type: mongoose.Schema.Types.ObjectId,

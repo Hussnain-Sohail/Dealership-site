@@ -4,4 +4,4 @@ const { FetchBikes } = require("../controller/BikeController.cjs");
 
 BikeRouter.post("/bikes", FetchBikes);
 
-module.exports = FetchBikes;
+module.exports = BikeRouter;

@@ -29,14 +29,14 @@ function DeleteAccount() {
                 body: JSON.stringify({ name, password }),
             });
             if (!request.ok) {
-                setData('Could not delete Account. Please try again later');
+                setData('Could not delete Account');
                 return;
             }
             const response = await request.json();
             setAccessToken(null);
             setData(response.message);
             setTimeout(() => {
-                navigate('/signup');
+                navigate('/');
             }, 2000);
         }
         catch (error) {

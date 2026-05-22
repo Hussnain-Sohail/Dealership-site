@@ -54,7 +54,7 @@ function MyAccount() {
       setData('Logging Out please wait ............');
       setAccessToken(null);
       setTimeout(() => {
-        navigate('/login'), 2000;
+        navigate('/'), 2000;
       })
     }
     catch (error) {

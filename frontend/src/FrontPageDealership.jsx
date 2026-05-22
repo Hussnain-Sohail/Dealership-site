@@ -111,7 +111,7 @@ function FrontPageDealership() {
 
         <div id="image2"></div>
 
-        <h1 id="header">See the brands we sell</h1>
+        <h1 id="header">See our services</h1>
 
         <footer>
           <div id="parent">

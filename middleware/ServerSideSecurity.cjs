@@ -2,9 +2,13 @@ const jwt = require("jsonwebtoken");
 
 async function ServerSideSecurity(req, res, next) {
   try {
+    console.log('middleware hit ?');
     const AuthHeader = req.headers["authorization"];
     if (!AuthHeader) {
-      return res.status(403).json({ message: "No token" });
+      {
+        console.log('if executed in middleware ?');
+        return res.status(403).json({ message: "No token" });
+      }
     }
 
     const AccessToken = AuthHeader.split(" ")[1];
