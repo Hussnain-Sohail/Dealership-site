@@ -63,7 +63,7 @@ function DeleteAccount() {
                 </form>
             </div>
             {data.length > 0 && <p>{data}</p>}
-            {data.length === 0 && <p id="message">Please not deleting account is permanent and cannot be undoned. Account cannot be deleted while there are orders pending</p>}
+            {data.length === 0 && <p id="message">Please note deleting an Account is permanent and cannot be changed. Account cannot be deleted while there are orders pending</p>}
         </div>
     )
 }
