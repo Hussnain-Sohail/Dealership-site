@@ -8,10 +8,26 @@ function MyAccount() {
   const [orders, setOrders] = useState([]);
   const [date, setDate] = useState('');
   const { AccessToken, setAccessToken } = useContext(AuthProvider);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [data, setData] = useState('');
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const getStatus = async () => {
+    try {
+      const request = await fetch('http://localhost:3500/accountstatus', {
+        method: 'GET',
+        headers: {
+          'authorization': `Bearer ${AccessToken}`
+        }
+      });
+      const response = await request.json();
+      setIsAdmin(response.isAdmin);
+    }
+    catch (error) {
+      console.error(error);
+    }
+  }
   useEffect(() => {
     const GetAccountInformation = async () => {
       try {
@@ -36,6 +52,7 @@ function MyAccount() {
       }
     };
     GetAccountInformation();
+    getStatus();
   }, []);
 
   const Submit = async () => {
@@ -79,7 +96,14 @@ function MyAccount() {
       <div>
         {data.length > 0 && <p>{data}</p>}
         {error.length > 0 && <p>{error}</p>}
-      </div>
+      </div><br />
+      {isAdmin && <Link to='/admin/addnewbike'>
+        <button>Add new bike</button>
+      </Link>}
+      <br />
+      {isAdmin && <Link to='/admin/removebike'>
+        <button>Remove Bike</button>
+      </Link>}
     </div>
   );
 }

@@ -30,7 +30,10 @@ function FindBike() {
         console.log(`bike ${response.FindBike.Name}`);
         setBike(response.FindBike);
       }
-      if (response.message) setError(response.message);
+      if (response.message) {
+        setPrint(false);
+        setError(response.message);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -81,7 +84,7 @@ function FindBike() {
           Show Bike
         </button>
       </div>
-      {bike && print && (
+      {bike !== {} && print && (
         <div>
           <p>Company: {bike.Company}</p>
           <p>Name: {bike.Name}</p>

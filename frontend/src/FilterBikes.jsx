@@ -24,9 +24,11 @@ function FilterBikes() {
       if (response.message.length > 0) setError(response.message);
       setPrint(true);
     } catch (error) {
+      setPrint(false);
       console.log(error);
     }
   };
+  console.log(`error ${error}`);
   return (
     <div>
       <div id="filter">
