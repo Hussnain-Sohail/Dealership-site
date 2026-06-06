@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import { AuthProvider } from 'react';
+import './css/AdminRemoveBike.css'
 function RemoveBike() {
     const [companyName, setCompanyName] = useState('');
     const [bikeName, setBikeName] = useState('');
-    const [userName, setUserName] = useState('');
     const [data, setData] = useState('');
     const { AccessToken, setAccessToken } = useState(AuthProvider);
 
-    const getUserName = (event) => {
-        setUserName(event.target.value);
-    }
     const getCompanyName = (event) => {
         setCompanyName(event.target.value);
     }
@@ -26,7 +23,7 @@ function RemoveBike() {
                     'authorization': `Bearer ${AccessToken}`,
                     'Content-Type': 'application/json'
                 }, body: JSON.stringify({
-                    userName, companyName, bikeName
+                    companyName, bikeName
                 })
             });
             const response = await request.json();
@@ -40,16 +37,18 @@ function RemoveBike() {
 
     return (
         <div>
-            <form onSubmit={Submit}>
-                <label>Enter Username</label><br />
-                <input type='text' onChange={getUserName} required /><br />
-                <label>Enter Company Name</label><br />
-                <input type='text' onChange={getCompanyName} required /><br />
-                <label>Enter Bike Name</label><br />
-                <input type='text' onChange={getBikeName} required /><br />
-                <button>Submit Request</button>
-            </form>
-            {data && <p>{data}</p>}
+            <div id='container-remove-bike'>
+                <h1>Remove Bike</h1>
+                <form onSubmit={Submit} id='remove-bike-form'>
+                    <label className='label'>Enter Company Name</label><br />
+                    <input className='input' type='text' onChange={getCompanyName} required /><br />
+                    <label className='label'>Enter Bike Name</label><br />
+                    <input className='input' type='text' onChange={getBikeName} required /><br />
+                    <button id='button'>Submit Request</button>
+                </form>
+                {data && <p>{data}</p>}
+            </div><br />
+            <p id='remove-warning'>Please note removing bike from database is permanent and cannot be undone !</p>
         </div>
     )
 }

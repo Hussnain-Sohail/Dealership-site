@@ -1,0 +1,35 @@
+#container-remove-bike {
+    width: 400px;
+    margin: 0 auto;
+}
+
+.input:hover {
+    border: 3px solid black;
+    border-radius: 6px;
+}
+
+#remove-bike-form {
+    background-color: rgba(199, 135, 82);
+    color: white;
+    border: 40px solid rgba(128, 83, 45);
+    height: 200px;
+    width: 250px;
+    border-radius: 15px;
+    margin-top: 10px;
+    margin-left: 10px;
+    padding-left: 20px;
+    padding-top: 10px;
+    padding-right: 20px;
+    text-align: center;
+}
+
+#remove-warning {
+    text-align: center;
+}
+
+#button:hover {
+    border: 4px solid grey;
+    box-shadow:
+        5px 5px 15px black,
+        -10px -10px 15px black;
+}
