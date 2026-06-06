@@ -98,11 +98,11 @@ function MyAccount() {
         {error.length > 0 && <p>{error}</p>}
       </div><br />
       {isAdmin && <Link to='/admin/addnewbike'>
-        <button>Add new bike</button>
+        <button className="button">Add new bike</button>
       </Link>}
       <br />
       {isAdmin && <Link to='/admin/removebike'>
-        <button>Remove Bike</button>
+        <button className="button">Remove Bike</button>
       </Link>}
     </div>
   );

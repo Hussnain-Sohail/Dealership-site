@@ -24,3 +24,8 @@
         5px 5px 15px black,
         -10px -10px 15px black;
 }
+
+#container-bike-card {
+    width: 400px;
+    margin: 0 auto;
+}

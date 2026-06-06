@@ -14,6 +14,8 @@ import DeleteAccount from "./DeleteAccount";
 import BikeDetails from "./BikeDetails";
 import PurchaseBike from "./PurchaseBike";
 import { Routes, Route } from "react-router-dom";
+import AdminAddBike from "./AdminAddBike";
+import RemoveBike from "./AdminRemoveBike";
 
 function App() {
   return (
@@ -46,6 +48,8 @@ function App() {
       />
       <Route path="/seemyorders" element={<Protect><SeeMyOrders /></Protect>} />
       <Route path="/purchasebike/:companyName/:bikeName" element={<Protect><PurchaseBike /></Protect>} />
+      <Route path="/admin/addnewbike" element={<Protect><AdminAddBike /></Protect>} />
+      <Route path="/admin/removebike" element={<Protect><RemoveBike /></Protect>} />
     </Routes>
   );
 }

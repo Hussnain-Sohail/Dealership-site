@@ -36,22 +36,26 @@ function BikeDetails() {
     }, [bike]);
 
     return (
-        <div id="bike-card-container">
-            {
-                bike ? (
-                    < div >
-                        <p>Name: {bike.Name} </p>
-                        <p>Company: {bike.Company}</p>
-                        <p>Top Speed: {bike.Topspeed} Km/h</p>
-                        <p>Horsepower: {bike.Horsepower}</p>
-                        <p>Engine specs: {bike.Engine}</p>
-                        <p>Price: {bike.Price} $USD</p>
-                    </div>
-                ) : (<p>Bike Not found. please try again later</p>)
-            }
-            <Link to={`/purchasebike/${bike.Company}/${bike.Name}`}>
-                <button id="purchase-button">Purchase Bike</button>
-            </Link>
+        <div id="container-bike-card">
+            <h1>Bike Details</h1>
+            <img src={bike.Image_Secure_URL} width='500px' height='500px' objectFit='cover' /><br />
+            <div id="bike-card-container">
+                {
+                    bike ? (
+                        < div >
+                            <p>Name: {bike.Name} </p>
+                            <p>Company: {bike.Company}</p>
+                            <p>Top Speed: {bike.TopSpeed} Km/h</p>
+                            <p>Horsepower: {bike.HorsePower}</p>
+                            <p>Engine specs: {bike.Engine}</p>
+                            <p>Price: {bike.Price} $USD</p>
+                        </div>
+                    ) : (<p>Bike Not found. please try again later</p>)
+                }
+                <Link to={`/purchasebike/${bike.Company}/${bike.Name}`}>
+                    <button id="purchase-button">Purchase Bike</button>
+                </Link>
+            </div>
         </div>
     )
 }

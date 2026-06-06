@@ -20,7 +20,6 @@ function YamahaFrontPage() {
         if (!request.ok) console.log("request was not ok in honda front page");
         const response = await request.json();
         setBikes(response.Bikes);
-        console.log(`Bikes ${response.Bikes[0].Name}`);
       } catch (error) {
         console.log(error);
       }
@@ -80,6 +79,7 @@ function YamahaFrontPage() {
             <Link key={index} to={`/bikedetails/${Company}/${data.Name}`}>
               <div className="bike-card">
                 <p className="bike-name">Name: {data.Name}</p>
+                <img src={data.Image_Secure_URL} width='300px' height='300px' objectFit='cover' />
               </div>
             </Link>
           );
