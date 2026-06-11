@@ -1,13 +1,15 @@
 const mongoose = require("mongoose");
 
 const BikeSchema = new mongoose.Schema({
-  Name: String,
-  Topspeed: Number,
-  Price: Number,
   Company: String,
-  Horsepower: Number,
+  Name: String,
+  TopSpeed: Number,
+  Price: Number,
+  HorsePower: Number,
   Engine: String,
   UnitsAvailable: Number,
+  Image_Public_id: String,
+  Image_Secure_URL: String,
 });
 
 module.exports = mongoose.model("Bike", BikeSchema);

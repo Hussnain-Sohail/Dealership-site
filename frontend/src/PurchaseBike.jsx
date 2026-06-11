@@ -60,6 +60,7 @@ function PurchaseBike() {
                 <input className="purchase-input" type="text" required onChange={getContactNumber} /><br />
                 <button id="purchase-button">Place Order</button>
             </form>
+            {data && <p>{data}</p>}
         </div>
     )
 }

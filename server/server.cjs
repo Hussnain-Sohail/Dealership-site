@@ -15,11 +15,13 @@ const CookieParser = require("cookie-parser");
 const ConnectToUserDB = require("../model/ConnectToUserDB.cjs");
 const ServerSideSecurity = require('../middleware/ServerSideSecurity.cjs');
 const PurchaseBikeRouter = require('../routes/PurchaseBikeRouter.cjs');
+const AdminCheckRouter = require('../routes/AdminCheckRouter.cjs');
+const AdminOpsRouter = require('../routes/AdminOpsRouter.cjs');
 
 ConnectToUserDB();
 
 const App = express();
-App.use(express.json());
+App.use(express.json({ limit: '50mb' }));
 App.use(
   cors({
     origin: "http://localhost:5173",
@@ -36,6 +38,8 @@ App.use('/', FindBikeRouter);
 App.use('/', BikeDetailsRouter);
 App.use('/', PurchaseBikeRouter);
 App.use('/', NewAccessTokenRouter);
+App.use('/', AdminCheckRouter);
+App.use('/', AdminOpsRouter);
 
 App.listen(process.env.PORT, () => {
   console.log("Server is running");

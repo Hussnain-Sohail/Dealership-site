@@ -23,24 +23,28 @@ async function AdminCheck(user) {
 }
 async function AddNewBike(req, res) {
     try {
-        const { userName, password, companyName, bikeName, topSpeed, price, horsePower, engine, unitsAvailable, imagePath } = req.body;
-        if (!password)
-            return res.status(401).json({ message: 'Password is required for adding a bike' });
-        else if (!companyName || !bikeName || !topSpeed || !price || !horsePower || !engine || !unitsAvailable)
+        const userName = req.user.Name;
+        const { companyName, bikeName, topSpeed, price, horsePower, engine, unitsAvailable, imagePath } = req.body;
+        if (!companyName || !bikeName || !topSpeed || !price || !horsePower || !engine || !unitsAvailable)
             return res.status(401).json({ message: 'All fileds are required for adding bike' });
+        else if (topspeed <= 0)
+            return res.json(401).json({ message: "Please enter valid top speed" });
+        else if (horsePower <= 0)
+            return res.json(401).json({ message: "Please enter valid horse power vslue" });
+        else if (unitsAvailable < 0)
+            return res.json(401).json({ message: "Please enter valid value for units available as negative units are invalid" });
         else if (!imagePath)
             return res.status(401).json({ message: 'Image path or image URL for bike image is required' });
 
         const findUser = await User.findOne({ Name: userName });
         if (!findUser)
             return res.status(403).json({ message: 'User not found. Access denied' });
-
-        const checkPassword = await bcrypt.compare(password, findUser.Password);
-        if (!checkPassword)
-            return res.status(403).json({ message: 'Access denied. Invalid password' });
-
-        if (!AdminCheck(findUser))
+        else if (!AdminCheck(findUser))
             return res.status(403).json({ message: 'Access denied only admin can add or remove a bike' });
+
+        const checkDuplicateBike = await Bike.findOne({ Company: companyName, Name: bikeName });
+        if (checkDuplicateBike)
+            return res.status(401).json({ message: 'Bike already exists' });
 
         const uploaded = await cloudinary.uploader.upload(imagePath);
 
@@ -69,7 +73,8 @@ async function AddNewBike(req, res) {
 
 async function RemoveBike(req, res) {
     try {
-        const { userName, companyName, bikeName } = req.body;
+        const userName = req.body.Name;
+        const { companyName, bikeName } = req.body;
         if (!companyName || !bikeName)
             return res.status(401).json({ message: 'All credentials are required for removing bike' });
 

@@ -65,7 +65,7 @@ async function PurchaseBike(req, res) {
   const session = await mongoose.startSession();
   try {
 
-    const name = req.user.name;
+    const name = req.user.Name;
     const { companyName, bikeName, password, city, contactNumber } = req.body;
 
     const citiesAuthorizedForShipping = JSON.parse(process.env.CITIES ?? '[]');
@@ -85,29 +85,24 @@ async function PurchaseBike(req, res) {
     if (!FindBike) {
       return res.json({ message: `Bike not found` });
     }
-    if (!bike) {
-      mongoose.abortTransaction();
+    if (!FindBike) {
       return res.json({ message: 'Bike not found' });
     }
     const FindUser = await User.findOne({ Name: name }, null, { session });
     if (!FindUser) {
-      mongoose.abortTransaction();
       return res.json({ message: `Username not found` });
     }
     const checkPassword = await bcrypt.compare(password, FindUser.Password);
     if (!checkPassword) {
-      mongoose.abortTransaction();
       return res.json({ message: 'Invalid password. Could not place order' });
     }
     if (FindUser.Orders.length === 3) {
-      mongoose.abortTransaction();
       return res.json({ message: 'Were sorry but u already have maximum order limits at a time (3) pending' });
     }
 
     if (contactNumber.length !== 11)
     //since a contact number in pakistan is 11 digits
     {
-      mongoose.abortTransaction();
       return res.json({ message: 'Please enter valid contact number' });
     }
 

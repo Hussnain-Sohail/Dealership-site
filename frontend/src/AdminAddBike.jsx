@@ -55,7 +55,7 @@ function AdminAddBike() {
         <div id='container-addbike'>
             <form onSubmit={Submit} id='add-bike-form'>
                 <label className='label'>Enter Company name</label><br />
-                <input className='input' type='number' onChange={getValue(setCompanyName)} required /><br />
+                <input className='input' type='text' onChange={getValue(setCompanyName)} required /><br />
                 <label className='label'>Enter Bike Name</label><br />
                 <input className='input' type='text' onChange={getValue(setBikeName)} required /><br />
                 <label className='label'>Enter TopSpeed</label><br />
