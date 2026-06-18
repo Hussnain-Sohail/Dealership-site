@@ -17,8 +17,10 @@ const ServerSideSecurity = require('../middleware/ServerSideSecurity.cjs');
 const PurchaseBikeRouter = require('../routes/PurchaseBikeRouter.cjs');
 const AdminCheckRouter = require('../routes/AdminCheckRouter.cjs');
 const AdminOpsRouter = require('../routes/AdminOpsRouter.cjs');
+const client = require('./redis.cjs')
 
 ConnectToUserDB();
+client.connect();
 
 const App = express();
 App.use(express.json({ limit: '50mb' }));

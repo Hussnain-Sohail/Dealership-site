@@ -15,14 +15,16 @@ function MyAccount() {
 
   const getStatus = async () => {
     try {
+      console.log('ran');
       const request = await fetch('http://localhost:3500/accountstatus', {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'authorization': `Bearer ${AccessToken}`
         }
       });
       const response = await request.json();
       setIsAdmin(response.isAdmin);
+      console.log('ended');
     }
     catch (error) {
       console.error(error);

@@ -6,7 +6,6 @@ import { Link } from "react-router";
 function LogIn() {
   const [Name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [data, setData] = useState("");
   const { AccessToken, setAccessToken } = useContext(AuthProvider);
 
@@ -32,13 +31,11 @@ function LogIn() {
         }),
       });
 
+      const response = await request.json();
       if (!request.ok) {
-        setError("Could not Login to Account. Please try again later");
-        console.log("Erro occured while signing Up");
+        setData(response.message)
         return;
       }
-
-      const response = await request.json();
       setData(response.message);
       setAccessToken(response.AccessToken);
     } catch (error) {
@@ -66,8 +63,7 @@ function LogIn() {
         <br />
         <button id="signup-button">Submit Information</button>
       </form>
-      {error.length > 0 && <p id="error">{error}</p>}
-      {data.length > 0 && <p id="data">{data}</p>}
+      {data && <p id="data">{data}</p>}
       <Link to="/signup">
         <p id="login-link">
           Dont have an Account yet. Click to create Youre Account

@@ -4,9 +4,7 @@ async function ServerSideSecurity(req, res, next) {
   try {
     const AuthHeader = req.headers["authorization"];
     if (!AuthHeader) {
-      {
-        return res.status(403).json({ message: "No token" });
-      }
+      return res.status(403).json({ message: "No token" });
     }
 
     const AccessToken = AuthHeader.split(" ")[1];

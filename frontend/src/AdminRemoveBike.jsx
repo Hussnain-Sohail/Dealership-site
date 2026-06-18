@@ -47,8 +47,7 @@ function RemoveBike() {
                     <button id='button'>Submit Request</button>
                 </form>
                 {data && <p>{data}</p>}
-            </div><br />
-            <p id='remove-warning'>Please note removing bike from database is permanent and cannot be undone !</p>
+            </div>
         </div>
     )
 }

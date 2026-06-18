@@ -43,23 +43,25 @@ async function AddNewBike(req, res) {
         const findUser = await User.findOne({ Name: req.user.Name });
         if (!findUser)
             return res.status(403).json({ message: 'User not found. Access denied' });
-        else if (!(await AdminCheck(findUser)))
+        else if (!(await AdminCheck(findUser))) {
+            console.log(`user role ${findUser.Role}`);
             return res.status(403).json({ message: 'Access denied only admin can add or remove a bike' });
+        }
 
-        const checkDuplicateBike = await Bike.findOne({ Company: bikeData.data.companyName, Name: bikeData.data.bikeName });
+        const checkDuplicateBike = await Bike.findOne({ Company: validData.data.companyName, Name: validData.data.bikeName });
         if (checkDuplicateBike)
             return res.status(401).json({ message: 'Bike already exists' });
 
-        const uploaded = await cloudinary.uploader.upload(bikeData.data.imagePath);
+        const uploaded = await cloudinary.uploader.upload(validData.data.imagePath);
 
         const NewBike = new Bike({
-            Company: bikeData.data.companyName,
-            Name: bikeData.data.bikeName,
-            TopSpeed: bikeData.data.topSpeed,
-            Price: bikeData.data.price,
-            HorsePower: bikeData.data.horsePower,
-            Engine: bikeData.data.engine,
-            UnitsAvailable: bikeData.data.unitsAvailable,
+            Company: validData.data.companyName,
+            Name: validData.data.bikeName,
+            TopSpeed: validData.data.topSpeed,
+            Price: validData.data.price,
+            HorsePower: validData.data.horsePower,
+            Engine: validData.data.engine,
+            UnitsAvailable: validData.data.unitsAvailable,
             Image_Public_id: uploaded.public_id,
             Image_Secure_URL: uploaded.secure_url
         });
@@ -70,7 +72,6 @@ async function AddNewBike(req, res) {
     }
     catch (error) {
         console.error(error);
-        await cloudinary.uploader.destroy(uploaded.public_id);
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
@@ -87,7 +88,7 @@ async function RemoveBike(req, res) {
         if (!findUser) {
             return res.status(403).json({ message: "User not found access forbidden" });
         }
-        else if (!AdminCheck(findUser)) {
+        else if (!await (AdminCheck(findUser))) {
             return res.status(403).json({ message: "User role is not admin access forbidden" });
         }
 
