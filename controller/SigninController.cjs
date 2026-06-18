@@ -30,12 +30,12 @@ async function SingUp(req, res) {
     await NewUser.save();
 
     const AccessToken = jwt.sign(
-      { Name: Name },
+      { Name: validData.data.Name },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "60s" },
     );
     const RefreshToken = jwt.sign(
-      { Name: Name },
+      { Name: validData.data.Name },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: "5m" },
     );

@@ -22,8 +22,6 @@ async function LogInController(req, res) {
     const totalAttempts = Number(await client.get(key));
 
     if (totalAttempts >= 3) {
-      console.log('request blocked ?');
-      await client.expire(key, 30);
       return res.status(403).json({ message: 'Request blocked. Please try again in 30 seconds' });
     }
 
@@ -32,9 +30,11 @@ async function LogInController(req, res) {
 
     const CheckPassword = await bcrypt.compare(validData.data.password, FindUser.Password);
     if (!CheckPassword) {
-      await client.incr(key);
-      console.log(`value of key ${await client.get(key)}`);
-      return res.status(403).json({ message: "Invalid Password" });
+      {
+        await client.incr(key);
+        await client.expire(key, 30);
+        return res.status(403).json({ message: "Invalid Password" });
+      }
     } else
       await client.del(key);
 

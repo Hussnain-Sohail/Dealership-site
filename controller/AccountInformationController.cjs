@@ -38,7 +38,7 @@ async function DeleteAccount(req, res) {
   else if (password !== confirmPassword)
     return res.json({ message: 'Invalid password writtwen while confirming' });
 
-  const checkPassword = bcrypt.compare(password, FindUser.Password);
+  const checkPassword = await bcrypt.compare(password, FindUser.Password);
   if (!checkPassword)
     return res.json({ message: "Invalid password" });
 

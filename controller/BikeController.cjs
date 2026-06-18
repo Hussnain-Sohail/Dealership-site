@@ -8,6 +8,15 @@ const User = require('../model/UserSchema.cjs');
 const Order = require('../model/OrderSchema.cjs');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
+const z = require('zod');
+
+const bikeData = z.object({
+  companyName: z.string(),
+  bikeName: z.string(),
+  password: z.string().min(6),
+  city: z.string(),
+  contactNumber: z.string().length(11),
+})
 
 async function FetchBikes(req, res) {
   try {
@@ -66,7 +75,11 @@ async function PurchaseBike(req, res) {
   try {
 
     const name = req.user.Name;
-    const { companyName, bikeName, password, city, contactNumber } = req.body;
+    const validData = bikeData.safeParse(req.body)
+    {
+      if (!validData.success)
+        return res.status(400).json({ message: validData.error.issues[0].message })
+    }
 
     const citiesAuthorizedForShipping = JSON.parse(process.env.CITIES ?? '[]');
 
@@ -81,18 +94,16 @@ async function PurchaseBike(req, res) {
       return res.json({ message: `Were sorry but we do not ship to ${city}` });
     }
 
-    const FindBike = await Bike.findOne({ Company: companyName, Name: bikeName });
+    const FindBike = await Bike.findOne({ Company: validData.data.companyName, Name: validData.data.bikeName });
     if (!FindBike) {
       return res.json({ message: `Bike not found` });
     }
-    if (!FindBike) {
-      return res.json({ message: 'Bike not found' });
-    }
+
     const FindUser = await User.findOne({ Name: name }, null, { session });
     if (!FindUser) {
       return res.json({ message: `Username not found` });
     }
-    const checkPassword = await bcrypt.compare(password, FindUser.Password);
+    const checkPassword = await bcrypt.compare(validData.data.password, FindUser.Password);
     if (!checkPassword) {
       return res.json({ message: 'Invalid password. Could not place order' });
     }
@@ -100,10 +111,9 @@ async function PurchaseBike(req, res) {
       return res.json({ message: 'Were sorry but u already have maximum order limits at a time (3) pending' });
     }
 
-    if (contactNumber.length !== 11)
-    //since a contact number in pakistan is 11 digits
-    {
-      return res.json({ message: 'Please enter valid contact number' });
+    const validPhone = new RegExp('^/0[0-9]{9}');
+    if (!(validPhone.pass(validData.data.contactNumber))) {
+      return res.status(403).json({ message: "Invalid phone number format" })
     }
 
     session.startTransaction();

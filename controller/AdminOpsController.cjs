@@ -4,7 +4,6 @@ require('dotenv').config({ path: '../server/.env' });
 const User = require('../model/UserSchema.cjs');
 const Bike = require('../model/BikeSchema.cjs');
 const bcrypt = require('bcryptjs');
-const { json } = require('stream/consumers');
 const z = require('zod');
 
 const bikeData = z.object({
@@ -78,7 +77,7 @@ async function AddNewBike(req, res) {
 
 async function RemoveBike(req, res) {
     try {
-        const userName = req.body.Name;
+        const userName = req.user.Name;
         const { companyName, bikeName } = req.body;
         if (!companyName || !bikeName)
             return res.status(401).json({ message: 'All credentials are required for removing bike' });
@@ -94,7 +93,7 @@ async function RemoveBike(req, res) {
 
         const findBike = await Bike.findOne({ Company: companyName, Name: bikeName });
         if (!findBike) {
-            return res.staus(401).json({ message: 'Bike not found' });
+            return res.status(401).json({ message: 'Bike not found' });
         }
 
         const Image_Public_id = findBike.Image_Public_id;
