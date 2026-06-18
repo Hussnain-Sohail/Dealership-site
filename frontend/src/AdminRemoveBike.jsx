@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { AuthProvider } from 'react';
+import { useState, useContext } from 'react';
+import { AuthProvider } from './AccessTokenProvider'
 import './css/AdminRemoveBike.css'
 function RemoveBike() {
     const [companyName, setCompanyName] = useState('');
     const [bikeName, setBikeName] = useState('');
     const [data, setData] = useState('');
-    const { AccessToken, setAccessToken } = useState(AuthProvider);
+    const { AccessToken, setAccessToken } = useContext(AuthProvider);
 
     const getCompanyName = (event) => {
         setCompanyName(event.target.value);
@@ -20,8 +20,8 @@ function RemoveBike() {
             const request = await fetch('http://localhost:3500/admin/removebike', {
                 method: 'DELETE',
                 headers: {
-                    'authorization': `Bearer ${AccessToken}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'authorization': `Bearer ${AccessToken}`
                 }, body: JSON.stringify({
                     companyName, bikeName
                 })
