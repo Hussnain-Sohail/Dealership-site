@@ -5,6 +5,17 @@ const User = require('../model/UserSchema.cjs');
 const Bike = require('../model/BikeSchema.cjs');
 const bcrypt = require('bcryptjs');
 const { json } = require('stream/consumers');
+const z = require('zod');
+
+const bikeData = z.object({
+    companyName: z.string(),
+    bikeName: z.string(),
+    topSpeed: z.number(),
+    horsePower: z.number(),
+    engine: z.string(),
+    unitsAvailable: z.number(),
+    imagePath: z.string(),
+})
 
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
@@ -23,39 +34,32 @@ async function AdminCheck(user) {
 }
 async function AddNewBike(req, res) {
     try {
-        const userName = req.user.Name;
-        const { companyName, bikeName, topSpeed, price, horsePower, engine, unitsAvailable, imagePath } = req.body;
-        if (!companyName || !bikeName || !topSpeed || !price || !horsePower || !engine || !unitsAvailable)
-            return res.status(401).json({ message: 'All fileds are required for adding bike' });
-        else if (topspeed <= 0)
-            return res.json(401).json({ message: "Please enter valid top speed" });
-        else if (horsePower <= 0)
-            return res.json(401).json({ message: "Please enter valid horse power vslue" });
-        else if (unitsAvailable < 0)
-            return res.json(401).json({ message: "Please enter valid value for units available as negative units are invalid" });
-        else if (!imagePath)
-            return res.status(401).json({ message: 'Image path or image URL for bike image is required' });
+        validData = bikeData.safeParse(req.body);
 
-        const findUser = await User.findOne({ Name: userName });
+        if (!validData.success) {
+            return res.status(400).json({ message: validData.error.issues[0].message });
+        }
+
+        const findUser = await User.findOne({ Name: req.user.Name });
         if (!findUser)
             return res.status(403).json({ message: 'User not found. Access denied' });
-        else if (!AdminCheck(findUser))
+        else if (!(await AdminCheck(findUser)))
             return res.status(403).json({ message: 'Access denied only admin can add or remove a bike' });
 
-        const checkDuplicateBike = await Bike.findOne({ Company: companyName, Name: bikeName });
+        const checkDuplicateBike = await Bike.findOne({ Company: bikeData.data.companyName, Name: bikeData.data.bikeName });
         if (checkDuplicateBike)
             return res.status(401).json({ message: 'Bike already exists' });
 
-        const uploaded = await cloudinary.uploader.upload(imagePath);
+        const uploaded = await cloudinary.uploader.upload(bikeData.data.imagePath);
 
         const NewBike = new Bike({
-            Company: companyName,
-            Name: bikeName,
-            TopSpeed: topSpeed,
-            Price: price,
-            HorsePower: horsePower,
-            Engine: engine,
-            UnitsAvailable: unitsAvailable,
+            Company: bikeData.data.companyName,
+            Name: bikeData.data.bikeName,
+            TopSpeed: bikeData.data.topSpeed,
+            Price: bikeData.data.price,
+            HorsePower: bikeData.data.horsePower,
+            Engine: bikeData.data.engine,
+            UnitsAvailable: bikeData.data.unitsAvailable,
             Image_Public_id: uploaded.public_id,
             Image_Secure_URL: uploaded.secure_url
         });
