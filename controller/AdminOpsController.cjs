@@ -10,6 +10,7 @@ const bikeData = z.object({
     companyName: z.string(),
     bikeName: z.string(),
     topSpeed: z.number(),
+    price: z.number(),
     horsePower: z.number(),
     engine: z.string(),
     unitsAvailable: z.number(),

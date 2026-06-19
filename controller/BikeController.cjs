@@ -9,6 +9,7 @@ const Order = require('../model/OrderSchema.cjs');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const z = require('zod');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const bikeData = z.object({
   companyName: z.string(),
@@ -70,57 +71,96 @@ async function BikeDetails(req, res) {
   return res.json({ bike: bike });
 }
 
+async function verfiyRequestData(req, res) {
+  const data = { valid: false, user: {}, bike: {} };
+  const name = req.user.Name;
+  const validData = bikeData.safeParse(req.body)
+  {
+    if (!validData.success)
+      res.status(400).json({ message: validData.error.issues[0].message });
+    return data;
+  }
+
+  const citiesAuthorizedForShipping = JSON.parse(process.env.CITIES ?? '[]');
+
+  let isValidCity = false;
+  for (const x of citiesAuthorizedForShipping) {
+    if (x === validData.data.city.toLowerCase()) {
+      isValidCity = true;
+      break;
+    }
+  }
+  if (!isValidCity) {
+    res.status(400).json({ message: `Were sorry but we do not ship to ${validData.data.city}` });
+    return data;
+  }
+
+  const FindBike = await Bike.findOne({ Company: validData.data.companyName, Name: validData.data.bikeName });
+  if (!FindBike || FindBike === undefined) {
+    res.status(400).json({ message: `Bike not found` });
+    return data;
+  }
+
+  const FindUser = await User.findOne({ Name: name }, null, { session });
+  if (!FindUser) {
+    res.status(403).json({ message: `Username not found` });
+    return data;
+  }
+  const checkPassword = await bcrypt.compare(validData.data.password, FindUser.Password);
+  if (!checkPassword) {
+    res.status(403).json({ message: 'Invalid password. Could not place order' });
+    return data;
+  }
+  if (FindUser.Orders.length === 3) {
+    res.status(400).json({ message: 'Were sorry but u already have maximum order limits at a time (3) pending' });
+    return data;
+  }
+  data.valid = true;
+  data.user = Bike.FindUser;
+  data.bike = FindBike;
+
+  return data;
+}
+
+async function stripeHandler(req, res, data) {
+  const stripeSession = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    mode: 'payment',
+    line_items: [{
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: `${data.bike.Company} ${data.bike.Name}`
+        },
+        unit_amount: data.bike.Price * 100
+      },
+      quantity: 1,
+    }],
+    success_url: process.env.SUCCESS_URL,
+    cancel_url: process.env.CANCEL_URL,
+  });
+
+  res.status(200).json({ message: '', stripeURL: stripeSession.url });
+  return stripeSession;
+}
+
 async function PurchaseBike(req, res) {
   const session = await mongoose.startSession();
   try {
+    const data = await verfiyRequestData(req, res);
+    if (!data.valid)
+      return;
 
-    const name = req.user.Name;
-    const validData = bikeData.safeParse(req.body)
-    {
-      if (!validData.success)
-        return res.status(400).json({ message: validData.error.issues[0].message })
-    }
+    const stripeSession = await stripeHandler(req, res);
 
-    const citiesAuthorizedForShipping = JSON.parse(process.env.CITIES ?? '[]');
-
-    let isValidCity = false;
-    for (const x of citiesAuthorizedForShipping) {
-      if (x === city.toLowerCase()) {
-        isValidCity = true;
-        break;
-      }
-    }
-    if (!isValidCity) {
-      return res.json({ message: `Were sorry but we do not ship to ${city}` });
-    }
-
-    const FindBike = await Bike.findOne({ Company: validData.data.companyName, Name: validData.data.bikeName });
-    if (!FindBike) {
-      return res.json({ message: `Bike not found` });
-    }
-
-    const FindUser = await User.findOne({ Name: name }, null, { session });
-    if (!FindUser) {
-      return res.json({ message: `Username not found` });
-    }
-    const checkPassword = await bcrypt.compare(validData.data.password, FindUser.Password);
-    if (!checkPassword) {
-      return res.json({ message: 'Invalid password. Could not place order' });
-    }
-    if (FindUser.Orders.length === 3) {
-      return res.json({ message: 'Were sorry but u already have maximum order limits at a time (3) pending' });
-    }
-
-    const validPhone = new RegExp('^/0[0-9]{9}');
-    if (!(validPhone.pass(validData.data.contactNumber))) {
-      return res.status(403).json({ message: "Invalid phone number format" })
-    }
+    if (stripeSession.payment_status !== 'paid')
+      return;
 
     session.startTransaction();
 
     const bike = await Bike.findOneAndUpdate({
-      Company: companyName,
-      Name: bikeName,
+      Company: data.bike.Company,
+      Name: data.bike.Name,
       UnitsAvailable: { $gt: 0 },
     },
       {
@@ -132,8 +172,8 @@ async function PurchaseBike(req, res) {
       },
     );
     const NewOrder = new Order({
-      BikeName: bikeName,
-      CompanyName: companyName,
+      Company: data.bike.Compnay,
+      Bike: data.bike.Name,
       OrederPlacedOnDate: new Date().toISOString(),
     });
 
