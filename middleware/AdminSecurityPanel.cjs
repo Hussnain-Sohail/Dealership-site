@@ -4,18 +4,15 @@ const User = require('../model/UserSchema.cjs');
 
 async function CheckIsAdmin(req, res) {
     try {
-        console.log('admin ran')
         const FindUser = await User.findOne({ Name: req.user.Name });
 
         if (!FindUser) {
             return res.status(403).json({ isAdmin: false });
         }
-
-        if (!FindUser.Role === 'admin') {
+        else if (!(FindUser.Role === 'admin')) {
             return res.status(403).json({ isAdmin: false })
-        }
-
-        return res.status(200).json({ isAdmin: true });
+        } else
+            return res.status(200).json({ isAdmin: true });
     }
     catch (error) {
         console.error(error);

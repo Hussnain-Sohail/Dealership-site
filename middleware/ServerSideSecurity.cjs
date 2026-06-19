@@ -7,7 +7,7 @@ async function ServerSideSecurity(req, res, next) {
       return res.status(403).json({ message: "No token" });
     }
 
-    const AccessToken = AuthHeader.split(" ")[1];
+    const AccessToken = AuthHeader.split(' ')[1];
     jwt.verify(
       AccessToken,
       process.env.ACCESS_TOKEN_SECRET,
