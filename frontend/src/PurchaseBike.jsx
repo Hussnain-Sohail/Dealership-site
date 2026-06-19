@@ -35,11 +35,14 @@ function PurchaseBike() {
                     companyName, bikeName, password, city, contactNumber
                 })
             });
+            const response = await request.json();
             if (!request.ok) {
-                setData('Could not place order');
+                setData(response.message)
                 return;
             }
-            const response = await request.json();
+            if (response.stripeURL) {
+                window.location = response.stripeURL;
+            }
             setData(response.message);
         }
         catch (error) {
