@@ -75,9 +75,8 @@ async function verfiyRequestData(req, res) {
   const data = { valid: false, user: {}, bike: {} };
   const name = req.user.Name;
   const validData = bikeData.safeParse(req.body)
-  {
-    if (!validData.success)
-      res.status(400).json({ message: validData.error.issues[0].message });
+  if (!validData.success) {
+    res.status(400).json({ message: validData.error.issues[0].message });
     return data;
   }
 
@@ -116,13 +115,17 @@ async function verfiyRequestData(req, res) {
     return data;
   }
   data.valid = true;
-  data.user = Bike.FindUser;
+  data.user = FindUser;
   data.bike = FindBike;
 
   return data;
 }
 
-async function stripeHandler(req, res, data) {
+async function stripeHandler(req, res) {
+  const data = await verfiyRequestData(req, res);
+  if (!data.valid)
+    return;
+
   const stripeSession = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
@@ -136,6 +139,10 @@ async function stripeHandler(req, res, data) {
       },
       quantity: 1,
     }],
+    metadata: {
+      bikeId: data.bike._id.toString(),
+      userId: data.user._id.toString(),
+    },
     success_url: process.env.SUCCESS_URL,
     cancel_url: process.env.CANCEL_URL,
   });
@@ -147,43 +154,56 @@ async function stripeHandler(req, res, data) {
 async function PurchaseBike(req, res) {
   const session = await mongoose.startSession();
   try {
-    const data = await verfiyRequestData(req, res);
-    if (!data.valid)
-      return;
-
-    const stripeSession = await stripeHandler(req, res);
-
-    if (stripeSession.payment_status !== 'paid')
-      return;
-
-    session.startTransaction();
-
-    const bike = await Bike.findOneAndUpdate({
-      Company: data.bike.Company,
-      Name: data.bike.Name,
-      UnitsAvailable: { $gt: 0 },
-    },
-      {
-        $inc: { UnitsAvailable: -1 }
-      },
-      {
-        new: true,
-        session,
-      },
+    const event = stripe.webhooks.constructEvent(
+      req.body,
+      req.headers['stripe-signature'],
+      process.env.STRIPE_WEBHOOK_SECRET,
     );
-    const NewOrder = new Order({
-      Company: data.bike.Compnay,
-      Bike: data.bike.Name,
-      OrederPlacedOnDate: new Date().toISOString(),
-    });
 
-    FindUser.Orders.push(NewOrder);
+    if (event.type === 'checkout.session.completed') {
+      session.startTransaction();
 
-    await NewOrder.save({ session });
-    await FindUser.save({ session });
-    await session.commitTransaction();
+      const { bikeId, userId } = event.data.object.metadata;
 
-    return res.json({ message: 'Order Placed successfully' });
+      const updatedBike = await Bike.findOneAndUpdate({
+        _id: bikeId,
+        UnitsAvailable: { $gt: 0 },
+      },
+        {
+          $inc: { UnitsAvailable: -1 }
+        },
+        {
+          new: true,
+          session,
+        },
+      );
+      if (!updatedBike) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({ message: 'Bike not found' });
+      }
+
+      const FindUser = await User.findById(userId).session(session);
+      if (!FindUser) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({ message: 'User not found' });
+      }
+
+      const NewOrder = new Order({
+        Company: updatedBike.Company,
+        Bike: updatedBike.Name,
+        OrederPlacedOnDate: new Date().toISOString(),
+      });
+      FindUser.Orders.push(NewOrder);
+
+      await NewOrder.save({ session });
+      await FindUser.save({ session });
+      await session.commitTransaction();
+
+      return res.sendStatus(200);
+    } else
+      return res.sendStatus(200);
   }
   catch (error) {
     console.error(error);
