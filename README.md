@@ -126,12 +126,9 @@ Payment Flow
 Future Improvements
 
 - Order history page
-- Image uploads with Cloudinary
-- Search and filtering
 - Pagination
 - Wishlist functionality
-- Unit and integration tests
-- Docker support
+- Unit and integration test
 - CI/CD pipeline
 
 Learning Objectives
