@@ -77,7 +77,7 @@ Installation
 
 Clone the repository
 
-git clone https://github.com/yourusername/your-repository.git
+git clone https://github.com/Hussnain-Sohail/Dealership-site.git
 
 Install backend dependencies
 
